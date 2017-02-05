@@ -3,6 +3,7 @@
     using UnityEngine;
     using UnityEditor;
     using System;
+    using VRTK.Keyboard;
     using RKeyLayout = VRTK_RenderableKeyLayout;
     using RKeyset = VRTK_RenderableKeyLayout.Keyset;
 

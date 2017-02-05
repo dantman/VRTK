@@ -3,7 +3,7 @@ namespace VRTK
 {
     using UnityEngine;
     using System.Collections.Generic;
-    using KeyClass = VRTK_Keyboard.KeyClass;
+    using VRTK.Keyboard;
     using KeyboardLayout = VRTK_KeyboardLayout;
     using KLKeyset = VRTK_KeyboardLayout.Keyset;
     using KLRow = VRTK_KeyboardLayout.Row;

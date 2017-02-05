@@ -3,7 +3,7 @@ namespace VRTK
 {
     using UnityEngine;
     using UnityEngine.Events;
-    using IKey = VRTK_Keyboard.IKey;
+    using VRTK.Keyboard;
     using RKeyLayout = VRTK_RenderableKeyLayout;
 
     /// <summary>

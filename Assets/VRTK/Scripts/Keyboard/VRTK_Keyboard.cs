@@ -3,7 +3,7 @@ namespace VRTK
 {
     using UnityEngine;
     using UnityEngine.UI;
-    using RKey = VRTK_RenderableKeyLayout.Key;
+    using VRTK.Keyboard;
 
     /// <summary>
     /// A VR keyboard
@@ -24,46 +24,6 @@ namespace VRTK
     /// </remarks>
     public class VRTK_Keyboard : MonoBehaviour
     {
-        /// <summary>
-        /// Keyboard key type
-        /// </summary>
-        /// <param name="Character">A key with character that should be typed.</param>
-        /// <param name="KeysetModifier">A key that switches keysets.</param>
-        /// <param name="Backspace">A backspace/delete key.</param>
-        /// <param name="Enter">An enter/return key.</param>
-        /// <param name="Done">A done key.</param>
-        public enum KeyClass
-        {
-            Character,
-            KeysetModifier,
-            Backspace,
-            Enter,
-            Done
-        }
-
-        /// <summary>
-        /// The core interface defining metadata a key requirires for `VRTK_Keyboard` to
-        /// handle key presses for it.
-        /// </summary>
-        public interface IKey
-        {
-            /// <summary>
-            /// Get the class of this key
-            /// </summary>
-            /// <returns></returns>
-            KeyClass GetKeyClass();
-            /// <summary>
-            /// Get the character to type if key class is KeyClass.Character
-            /// </summary>
-            /// <returns>The character to type</returns>
-            char GetCharacter();
-            /// <summary>
-            /// Get the keyset to switch to if key class is KeyClass.Keyset
-            /// </summary>
-            /// <returns>The keyset to switch to</returns>
-            int GetKeyset();
-        }
-
         [Tooltip("A UI.InputField to send all keyboard info to")]
         public InputField fixedInputField;
 

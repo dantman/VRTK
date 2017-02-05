@@ -3,8 +3,7 @@ namespace VRTK
 {
     using UnityEngine;
     using System;
-    using KeyClass = VRTK_Keyboard.KeyClass;
-    using IKey = VRTK_Keyboard.IKey;
+    using VRTK.Keyboard;
 
     /// <summary>
     /// The Keyboard Layout script defines a creatable scriptable object defining the keys present on a keyboard rendered by a Keyboard Renderer.
@@ -24,22 +23,42 @@ namespace VRTK
     ///   
     /// </remarks>
     [CreateAssetMenu(fileName = "KeyboardLayout", menuName = "VRTK/KeyboardLayout")]
-    public class VRTK_KeyboardLayout : ScriptableObject
+    public class VRTK_KeyboardLayout : ScriptableObject, IKeyLayout<VRTK_KeyboardLayout.Keyset>
     {
         [Serializable]
-        public class Keyset
+        public class Keyset : IRowKeyset<Row, Key>
         {
             public string name;
             public Row[] rows;
+
+            public string GetName()
+            {
+                return name;
+            }
+
+            public Row[] GetRows()
+            {
+                return rows;
+            }
         }
 
         [Serializable]
-        public class Row
+        public class Row : IRow<Key>, ISplittable
         {
             public Key[] keys;
             public int splitIndex;
+
+            public Key[] GetKeys()
+            {
+                return keys;
+            }
+
+            public int GetSplitIndex()
+            {
+                return splitIndex;
+            }
         }
-        
+
         [Serializable]
         public abstract class BaseKey
         {
@@ -47,7 +66,7 @@ namespace VRTK
         }
 
         [Serializable]
-        public class Key : BaseKey, IKey
+        public class Key : BaseKey, IKey, IWeighted
         {
             public KeyClass keyClass;
             public int keyset;
@@ -67,6 +86,11 @@ namespace VRTK
             public int GetKeyset()
             {
                 return keyset;
+            }
+
+            public int GetWeight()
+            {
+                return weight;
             }
         }
 
@@ -90,5 +114,10 @@ namespace VRTK
         }
 
         public Keyset[] keysets = new Keyset[1];
+
+        public Keyset[] GetKeysets()
+        {
+            return keysets;
+        }
     }
 }

@@ -3,7 +3,7 @@
     using UnityEngine;
     using UnityEditor;
     using System;
-    using KeyClass = VRTK_Keyboard.KeyClass;
+    using VRTK.Keyboard;
 
     [CustomEditor(typeof(VRTK_KeyboardLayout))]
     public class VRTK_KeyboardLayoutEditor : Editor

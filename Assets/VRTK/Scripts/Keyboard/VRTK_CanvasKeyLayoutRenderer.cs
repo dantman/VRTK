@@ -3,13 +3,13 @@ namespace VRTK
 {
     using UnityEngine;
     using UnityEngine.UI;
-    using UnityEngine.Events;
     using System;
-    using KeyClass = VRTK_Keyboard.KeyClass;
+    using VRTK.Keyboard;
     using RKeyLayout = VRTK_RenderableKeyLayout;
     using RKeyset = VRTK_RenderableKeyLayout.Keyset;
     using RKeyArea = VRTK_RenderableKeyLayout.KeyArea;
     using RKey = VRTK_RenderableKeyLayout.Key;
+
     /// <summary>
     /// The canvas key layout renderer script renders a functional keyboard to a UI.Canvas
     /// </summary>

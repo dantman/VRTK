@@ -6,8 +6,9 @@
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public class VRTK_KeyLayoutCalculatorAttribute : Attribute
     {
-        public VRTK_KeyLayoutCalculatorAttribute() {
-            
+        public VRTK_KeyLayoutCalculatorAttribute()
+        {
+
         }
 
         public string name { get; set; }

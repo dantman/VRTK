@@ -2,8 +2,7 @@
 namespace VRTK
 {
     using UnityEngine;
-    using KeyClass = VRTK_Keyboard.KeyClass;
-    using IKey = VRTK_Keyboard.IKey;
+    using VRTK.Keyboard;
     using System;
 
     /// <summary>
@@ -16,12 +15,12 @@ namespace VRTK
     /// - Per-key metadata base off KeyboardLayout
     /// - Calculated positions and dimensions for each key within key area containers
     /// </remarks>
-    public class VRTK_RenderableKeyLayout
+    public class VRTK_RenderableKeyLayout : IKeyLayout<VRTK_RenderableKeyLayout.Keyset>
     {
         /// <summary>
         /// A renderable keyset
         /// </summary>
-        public class Keyset
+        public class Keyset : IAreaKeyset<KeyArea, Key>
         {
             /// <summary>
             /// The name of this keyset
@@ -40,12 +39,22 @@ namespace VRTK
                     VRTK_DebugHelpers.ArrayPropertyDebugString("areas", areas),
                 });
             }
+
+            public string GetName()
+            {
+                return name;
+            }
+
+            public KeyArea[] GetKeyAreas()
+            {
+                return areas;
+            }
         }
 
         /// <summary>
         /// A renderable key area
         /// </summary>
-        public class KeyArea
+        public class KeyArea : IKeyArea<Key>
         {
             /// <summary>
             /// The name of this key area
@@ -67,6 +76,11 @@ namespace VRTK
                     VRTK_DebugHelpers.PropertyDebugString("rect", rect),
                     VRTK_DebugHelpers.ArrayPropertyDebugString("keys", keys),
                 });
+            }
+
+            public Key[] GetKeys()
+            {
+                return keys;
             }
         }
 
@@ -140,6 +154,11 @@ namespace VRTK
             {
                 VRTK_DebugHelpers.ArrayPropertyDebugString("keysets", keysets),
             });
+        }
+
+        public Keyset[] GetKeysets()
+        {
+            return keysets;
         }
     }
 }
