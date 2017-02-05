@@ -5,9 +5,6 @@ namespace VRTK
     using System.Collections.Generic;
     using VRTK.Keyboard;
     using KeyboardLayout = VRTK_KeyboardLayout;
-    using KLKeyset = VRTK_KeyboardLayout.Keyset;
-    using KLRow = VRTK_KeyboardLayout.Row;
-    using KLKey = VRTK_KeyboardLayout.Key;
     using RKeyLayout = VRTK_RenderableKeyLayout;
     using RKeyset = VRTK_RenderableKeyLayout.Keyset;
     using RKeyArea = VRTK_RenderableKeyLayout.KeyArea;
@@ -28,19 +25,19 @@ namespace VRTK
     public abstract class VRTK_BaseKeyboardLayoutCalculator : VRTK_BaseKeyLayoutCalculator
     {
         [Tooltip("Keyboard layout to render")]
-        public VRTK_KeyboardLayout keyboardLayout;
+        public KeyboardLayout keyboardLayout;
 
         /// <summary>
         /// A high-level builder for renderable keyboard layouts
         /// </summary>
         protected class RKeyboardBuilder
         {
-            private KeyboardLayout keyboardLayout;
+            private IKeyLayout<IRowKeyset<IRow<IKey>, IKey>> keyLayout;
             private RKeyLayout rKeyboard;
 
-            public RKeyboardBuilder(KeyboardLayout keyboardLayout)
+            public RKeyboardBuilder(IKeyLayout<IRowKeyset<IRow<IKey>, IKey>> keyLayout)
             {
-                this.keyboardLayout = keyboardLayout;
+                this.keyLayout = keyLayout;
                 this.rKeyboard = new RKeyLayout();
             }
 
@@ -50,12 +47,13 @@ namespace VRTK
             /// <returns>An iterator over keyset builders</returns>
             public IEnumerable<BKeyset> Keysets()
             {
-                rKeyboard.keysets = new RKeyset[keyboardLayout.keysets.Length];
-                for (int s = 0; s < keyboardLayout.keysets.Length; s++)
+                IRowKeyset<IRow<IKey>, IKey>[] keysets = keyLayout.GetKeysets();
+                rKeyboard.keysets = new RKeyset[keysets.Length];
+                for (int s = 0; s < keysets.Length; s++)
                 {
-                    KLKeyset keyset = keyboardLayout.keysets[s];
+                    IRowKeyset<IRow<IKey>, IKey> keyset = keysets[s];
                     RKeyset rKeyset = new RKeyset();
-                    rKeyset.name = keyset.name;
+                    rKeyset.name = keyset.GetName();
 
                     BKeyset bKeyset = new BKeyset(s, keyset, rKeyset);
                     yield return bKeyset;
@@ -85,9 +83,9 @@ namespace VRTK
             /// </summary>
             public readonly int index;
             /// <summary>
-            /// The original KeyboardLayout.Keyset
+            /// The source Keyset
             /// </summary>
-            public readonly KLKeyset raw;
+            public readonly IRowKeyset<IRow<IKey>, IKey> raw;
             /// <summary>
             /// The RenderableKeyLayout.Keyset being built
             /// </summary>
@@ -96,7 +94,7 @@ namespace VRTK
             private List<RKeyArea> rAreas = new List<RKeyArea>();
             private List<BKeyArea> bAreas = new List<BKeyArea>();
 
-            public BKeyset(int index, KLKeyset raw, RKeyset renderable)
+            public BKeyset(int index, IRowKeyset<IRow<IKey>, IKey> raw, RKeyset renderable)
             {
                 this.index = index;
                 this.raw = raw;
@@ -126,10 +124,11 @@ namespace VRTK
             /// <returns>High-level row builders</returns>
             public BRow[] Rows()
             {
-                BRow[] rows = new BRow[raw.rows.Length];
-                for (int r = 0; r < raw.rows.Length; r++)
+                IRow<IKey>[] rawRows = raw.GetRows();
+                BRow[] rows = new BRow[rawRows.Length];
+                for (int r = 0; r < rawRows.Length; r++)
                 {
-                    rows[r] = new BRow(r, raw.rows[r]);
+                    rows[r] = new BRow(r, rawRows[r]);
                 }
                 return rows;
             }
@@ -205,17 +204,27 @@ namespace VRTK
             /// <summary>
             /// The original KeyboardLayout.Row
             /// </summary>
-            public readonly KLRow raw;
+            public readonly IRow<IKey> raw;
 
             public int keyCount
             {
-                get { return raw.keys.Length; }
+                get { return raw.GetKeys().Length; }
             }
 
-            public BRow(int index, KLRow raw)
+            public BRow(int index, IRow<IKey> raw)
             {
                 this.index = index;
                 this.raw = raw;
+            }
+
+            protected int GetSplitIndex()
+            {
+                ISplittable splittableRow = raw as ISplittable;
+                if (splittableRow != null)
+                {
+                    return splittableRow.GetSplitIndex();
+                }
+                return 0;
             }
 
             /// <summary>
@@ -224,10 +233,11 @@ namespace VRTK
             /// <returns>High-level key builders</returns>
             public BKey[] Keys()
             {
-                BKey[] keys = new BKey[raw.keys.Length];
-                for (int k = 0; k < raw.keys.Length; k++)
+                IKey[] rawKeys = raw.GetKeys();
+                BKey[] keys = new BKey[rawKeys.Length];
+                for (int k = 0; k < rawKeys.Length; k++)
                 {
-                    keys[k] = new BKey(k, k, raw.keys[k]);
+                    keys[k] = new BKey(k, k, rawKeys[k]);
                 }
                 return keys;
             }
@@ -238,10 +248,12 @@ namespace VRTK
             /// <returns>High-level key builders</returns>
             public BKey[] LeftKeys()
             {
-                BKey[] keys = new BKey[raw.splitIndex];
-                for (int k = 0; k < raw.splitIndex; k++)
+                int splitIndex = GetSplitIndex();
+                IKey[] rawKeys = raw.GetKeys();
+                BKey[] keys = new BKey[splitIndex];
+                for (int k = 0; k < splitIndex; k++)
                 {
-                    keys[k] = new BKey(k, k, raw.keys[k]);
+                    keys[k] = new BKey(k, k, rawKeys[k]);
                 }
                 return keys;
             }
@@ -252,10 +264,12 @@ namespace VRTK
             /// <returns>High-level key builders</returns>
             public BKey[] RightKeys()
             {
-                BKey[] keys = new BKey[raw.keys.Length - raw.splitIndex];
-                for (int k = raw.splitIndex; k < raw.keys.Length; k++)
+                int splitIndex = GetSplitIndex();
+                IKey[] rawKeys = raw.GetKeys();
+                BKey[] keys = new BKey[rawKeys.Length - splitIndex];
+                for (int k = splitIndex; k < rawKeys.Length; k++)
                 {
-                    keys[k - raw.splitIndex] = new BKey(k, k - raw.splitIndex, raw.keys[k]);
+                    keys[k - splitIndex] = new BKey(k, k - splitIndex, rawKeys[k]);
                 }
                 return keys;
             }
@@ -277,13 +291,19 @@ namespace VRTK
             /// <summary>
             /// The original KeyboardLayout.Key
             /// </summary>
-            public readonly KLKey raw;
+            public readonly IKey raw;
 
             public int weight
             {
                 get
                 {
-                    return raw.weight < 1 ? 1 : raw.weight;
+                    IWeighted weightedKey = raw as IWeighted;
+                    if (weightedKey != null)
+                    {
+                        int weight = weightedKey.GetWeight();
+                        return weight < 1 ? 1 : weight;
+                    }
+                    return 1;
                 }
             }
 
@@ -291,11 +311,11 @@ namespace VRTK
             {
                 get
                 {
-                    return raw.keyClass != KeyClass.Character;
+                    return raw.GetKeyClass() != KeyClass.Character;
                 }
             }
 
-            public BKey(int index, int localIndex, KLKey raw)
+            public BKey(int index, int localIndex, IKey raw)
             {
                 this.index = index;
                 this.localIndex = localIndex;
@@ -310,19 +330,19 @@ namespace VRTK
             {
                 RKey rKey = new RKey();
 
-                rKey.keyClass = raw.keyClass;
-                switch (raw.keyClass)
+                rKey.keyClass = raw.GetKeyClass();
+                switch (rKey.keyClass)
                 {
                     case KeyClass.Character:
-                        rKey.character = raw.character;
-                        rKey.label = rKey.name = raw.character.ToString();
-                        if (raw.character == ' ')
+                        rKey.character = raw.GetCharacter();
+                        rKey.label = rKey.name = rKey.character.ToString();
+                        if (rKey.character == ' ')
                         {
                             rKey.name = "Spacebar";
                         }
                         break;
                     case KeyClass.KeysetModifier:
-                        rKey.keyset = raw.keyset;
+                        rKey.keyset = raw.GetKeyset();
                         rKey.name = "KeysetModifier";
                         rKey.label = ""; // We do not have enough information to set this now
                         break;
@@ -358,7 +378,7 @@ namespace VRTK
         /// <returns></returns>
         protected RKeyboardBuilder BuildKeyboard()
         {
-            return new RKeyboardBuilder(keyboardLayout);
+            return new RKeyboardBuilder((IKeyLayout<IRowKeyset<IRow<IKey>, IKey>>)keyboardLayout);
         }
 
         /// <summary>

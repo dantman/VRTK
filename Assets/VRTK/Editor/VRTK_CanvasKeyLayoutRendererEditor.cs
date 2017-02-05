@@ -23,10 +23,10 @@
         public override void OnInspectorGUI()
         {
             VRTK_CanvasKeyLayoutRenderer renderer = (VRTK_CanvasKeyLayoutRenderer)target;
-            RKeyLayout keyLayout = renderer.CalculateRenderableKeyLayout(Vector2.one * 100);
+            IKeyLayout<IKeyset> keyLayout = (IKeyLayout<IKeyset>)renderer.CalculateRenderableKeyLayout(Vector2.one * 100);
             keysetNames = keyLayout == null
                 ? null
-                : Array.ConvertAll(keyLayout.keysets, (keyset) => keyset.name);
+                : Array.ConvertAll(keyLayout.GetKeysets(), (keyset) => keyset.GetName());
 
             if (renderer.keyTemplate == null)
             {
